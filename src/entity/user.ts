@@ -1,13 +1,20 @@
-import { Column, Entity, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import {
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from "typeorm";
 
 @Entity()
-export class User {
-  @PrimaryGeneratedColumn()
+export default class User extends BaseEntity {
+  @PrimaryGeneratedColumn("uuid")
   userId!: number;
   @Column()
   username!: string;
   @Column()
   password!: string;
   @Column()
-  rToken!: string;
+  rToken?: string;
 }
