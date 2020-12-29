@@ -1,20 +1,26 @@
 import {
-  BaseEntity,
-  Column,
-  CreateDateColumn,
-  Entity,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
+  BaseEntity as baseEntity,
+  Column as column,
+  CreateDateColumn as createDateColumn,
+  Entity as entity,
+  PrimaryGeneratedColumn as primaryGeneratedColumn,
+  UpdateDateColumn as updateDateColumn,
 } from "typeorm";
 
-@Entity()
-export default class User extends BaseEntity {
-  @PrimaryGeneratedColumn("uuid")
+@entity()
+export default class User extends baseEntity {
+  @primaryGeneratedColumn("uuid")
   userId!: number;
-  @Column()
+
+  @column()
+  email!: string;
+
+  @column()
   username!: string;
-  @Column()
+
+  @column()
   password!: string;
-  @Column()
-  rToken?: string;
+
+  @column()
+  rToken!: string;
 }

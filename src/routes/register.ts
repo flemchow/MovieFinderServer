@@ -1,43 +1,58 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
 import bycrpt from "bcrypt";
-import { query } from "../connections";
+import { User } from "../entity";
+import { getConnection } from "typeorm";
 export const register = express.Router();
 register.use(bodyParser.urlencoded({ extended: false }));
 
-register.post("/", async (req, res) => {
+// create new account
+register.post("/", async (req: Request, res: Response) => {
+  let { username, password, email } = req.body;
   try {
-    const hashedPassword = await bycrpt.hash(req.body.password, 10);
-    let user = {
-      username: req.body.username,
+    const hashedPassword = await bycrpt.hash(password, 10);
+    let newUser = {
+      email: email,
+      username: username,
       password: hashedPassword,
     };
-    const sqlStringCheckExists =
-      "SELECT EXISTS(SELECT * FROM users WHERE username = ?)";
-    const checkExists = await query(sqlStringCheckExists, [user.username]);
-
-    console.log(typeof checkExists);
-    console.log(checkExists);
-    if (typeof checkExists === "object" && checkExists) {
-      if (checkExists) {
-        const sqlString = "INSERT INTO users set ?";
-        const response = await query(sqlString, user);
-
-        if (typeof response === "number") res.sendStatus(response);
-      } else {
-        res.sendStatus(409);
-      }
+    const existUsername = await User.find({ username: username });
+    const existEmail = await User.find({ email: email });
+    if (!existEmail.length || !existUsername.length) {
+      const response = await getConnection()
+        .createQueryBuilder()
+        .insert()
+        .into(User)
+        .values(newUser)
+        .execute();
+      response.raw.serverStatus === 2
+        ? res.sendStatus(200)
+        : res.sendStatus(500);
+    } else {
+      res.sendStatus(409);
     }
   } catch {
     res.sendStatus(500);
   }
 });
 
-register.delete("/", async (req, res) => {
-  let username = req.body.username;
-
-  const sqlString = "DELETE FROM users WHERE username = ?";
-  const response = await query(sqlString, [username]);
-
-  if (typeof response === "number") res.sendStatus(response);
+// delete account
+register.delete("/", async (req: Request, res: Response) => {
+  let userId = req.body.userId;
+  try {
+    const exists = await User.find({ userId: userId });
+    if (exists) {
+      const response = await getConnection()
+        .createQueryBuilder()
+        .delete()
+        .from(User)
+        .where("userId = :userId", { userId: userId })
+        .execute();
+      response.raw.serverStatus === 2
+        ? res.sendStatus(200)
+        : res.sendStatus(500);
+    }
+  } catch {
+    res.sendStatus(500);
+  }
 });
