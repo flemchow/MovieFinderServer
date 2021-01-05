@@ -23,7 +23,7 @@ async function run() {
     database: DATABASE,
     synchronize: true,
     logging: false,
-    entities: ["src/entity/**/*.ts"],
+    entities: ["dist/entity/**/*.js"],
     migrations: ["src/migration/**/*.ts"],
     subscribers: ["src/subscriber/**/*.ts"],
   });
